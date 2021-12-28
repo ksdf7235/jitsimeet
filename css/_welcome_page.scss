@@ -20,14 +20,19 @@ body.welcome-page {
         background-size: $welcomePageHeaderBackgroundSize;
         padding-bottom: $welcomePageHeaderPaddingBottom;
         background-color: #131519;
-        height: 400px;
         overflow: hidden;
-        position: relative;
+        position: absolute;
+        width: 100%;
+        height: 100%;
 
         .header-container {
-            display: $welcomePageHeaderContainerDisplay;
+            display: flex;
             flex-direction: column;
-            margin: $welcomePageHeaderContainerMargin;
+            align-items: center;
+            justify-content: center;
+            margin: auto;
+            height: 100%;
+            width: 100%;
             z-index: $zindex2;
         }
 
@@ -221,8 +226,8 @@ body.welcome-page {
         height: 100%;
 
         .watermark.leftwatermark {
-            width: $welcomePageWatermarkWidth;
-            height: $welcomePageWatermarkHeight;
+            width: 200px;
+            height: 200px;
         }
     }
 

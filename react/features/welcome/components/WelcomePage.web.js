@@ -252,28 +252,27 @@ class WelcomePage extends AbstractWelcomePage {
                                     }
                                 </p>
                             </div>)}
-                    </div>
-                </div>
-
-                <div className = 'welcome-cards-container'>
-                    <div className = 'welcome-card-row'>
-                        <div className = 'welcome-tabs welcome-card welcome-card--blue'>
-                            { this._renderTabs() }
                         </div>
-                        { showAdditionalCard
-                            ? <div
-                                className = 'welcome-card welcome-card--dark'
-                                ref = { this._setAdditionalCardRef } />
-                            : null }
-                    </div>
+                        <div className = 'welcome-cards-container'>
+                            <div className = 'welcome-card-row'>
+                                <div className = 'welcome-tabs welcome-card welcome-card--blue'>
+                                    { this._renderTabs() }
+                                </div>
+                                { showAdditionalCard
+                                    ? <div
+                                        className = 'welcome-card welcome-card--dark'
+                                        ref = { this._setAdditionalCardRef } />
+                                    : null }
+                            </div>
 
-                    { showAdditionalContent
-                        ? <div
-                            className = 'welcome-page-content'
-                            ref = { this._setAdditionalContentRef } />
-                        : null }
+                            { showAdditionalContent
+                                ? <div
+                                    className = 'welcome-page-content'
+                                    ref = { this._setAdditionalContentRef } />
+                                : null }
+                        </div>
                 </div>
-                { DISPLAY_WELCOME_FOOTER && this._renderFooter()}
+
             </div>
 
         );

@@ -71,10 +71,14 @@ function _getWebConferenceRoute(state) {
  */
 function _getWebWelcomePageRoute(state) {
     const route = _getEmptyRoute();
+    const {pathname} = window.location;
 
     if (isWelcomePageUserEnabled(state)) {
         if (isSupportedBrowser()) {
-            route.component = WelcomePage;
+            if(pathname === "/"){
+                console.log(`here`)
+                route.component = WelcomePage;
+            }
         } else {
             route.component = UnsupportedDesktopBrowser;
         }
