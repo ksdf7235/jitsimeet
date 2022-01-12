@@ -1,23 +1,41 @@
 // @flow
 
-import { jitsiLocalStorage } from '@jitsi/js-utils';
+import {jitsiLocalStorage} from '@jitsi/js-utils';
 import _ from 'lodash';
-import React, { Component, Fragment } from 'react';
-import { I18nextProvider } from 'react-i18next';
-import { Provider } from 'react-redux';
-import { compose, createStore } from 'redux';
+import React, {Component, Fragment} from 'react';
+import {I18nextProvider} from 'react-i18next';
+import {Provider} from 'react-redux';
+import {compose, createStore} from 'redux';
 import Thunk from 'redux-thunk';
 
-import { i18next } from '../../i18n';
+import {i18next} from '../../i18n';
 import {
     MiddlewareRegistry,
     PersistenceRegistry,
     ReducerRegistry,
     StateListenerRegistry
 } from '../../redux';
-import { SoundCollection } from '../../sounds';
-import { appWillMount, appWillUnmount } from '../actions';
+import {SoundCollection} from '../../sounds';
+import {appWillMount, appWillUnmount} from '../actions';
 import logger from '../logger';
+
+/*
+*  DVision 전용 미들웨어 및 모듈 추가
+* */
+import createSagaMiddleware from 'redux-saga';
+import rootSaga from '../../../../modules/rootSaga';
+import * as modules from '../../../../modules'
+
+import {HashRouter, Route, Switch} from 'react-router-dom';
+import WelcomePage from '../../../welcome/components/WelcomePage.web';
+import WelcomePageMain from '../../../welcome/components/WelcomePageMain';
+import DvisionPlanPage from '../../../dvision/screens/Plan';
+
+
+const middlewares = [];
+
+const sagaMiddleware = createSagaMiddleware();
+middlewares.push(sagaMiddleware);
 
 declare var APP: Object;
 
@@ -101,18 +119,6 @@ export default class BaseApp extends Component<*, State> {
     }
 
     /**
-     * Logs for errors that were not caught.
-     *
-     * @param {Error} error - The error that was thrown.
-     * @param {Object} info - Info about the error(stack trace);.
-     *
-     * @returns {void}
-     */
-    componentDidCatch(error: Error, info: Object) {
-        logger.error(error, info);
-    }
-
-    /**
      * Delays this {@code BaseApp}'s startup until the {@code Storage}
      * implementation of {@code localStorage} initializes. While the
      * initialization is instantaneous on Web (with Web Storage API), it is
@@ -134,18 +140,45 @@ export default class BaseApp extends Component<*, State> {
      * @returns {ReactElement}
      */
     render() {
-        const { route: { component, props }, store } = this.state;
+        const {route: {component, props}, store} = this.state;
 
         if (store) {
             return (
-                <I18nextProvider i18n = { i18next }>
-                    <Provider store = { store }>
-                        <Fragment>
-                            { this._createMainElement(component, props) }
-                            <SoundCollection />
-                            { this._createExtraElement() }
-                            { this._renderDialogContainer() }
-                        </Fragment>
+                <I18nextProvider i18n={i18next}>
+                    <Provider store={store}>
+                        <HashRouter>
+                            <Switch>
+                                <Fragment>
+                                    {this._createMainElement(component, props)}
+                                    <SoundCollection/>
+                                    {this._createExtraElement()}
+                                    <Route
+                                        exact
+                                        path="/meetingRoom"
+                                        name="MainPage"
+                                        >
+                                            <WelcomePage />
+                                        </Route>
+                                    <Route
+                                        exact
+                                        path="/"
+                                        name="MainPage"
+                                        render={(props) =>
+                                            <WelcomePageMain {...props} />}
+
+                                            />
+                                    <Route
+                                        exact
+                                        path="/plan"
+                                        name="PlanPage"
+                                        render={(props) =>
+                                            <DvisionPlanPage {...props} />}
+
+                                            />
+                                </Fragment>
+                            </Switch>
+                        </HashRouter>
+                        {this._renderDialogContainer()}
                     </Provider>
                 </I18nextProvider>
             );
@@ -192,25 +225,29 @@ export default class BaseApp extends Component<*, State> {
      */
     _createStore() {
         // Create combined reducer from all reducers in ReducerRegistry.
-        const reducer = ReducerRegistry.combineReducers();
+        // DVision 모듈 추가
+        const reducer = ReducerRegistry.combineReducers(modules);
 
         // Apply all registered middleware from the MiddlewareRegistry and
         // additional 3rd party middleware:
         // - Thunk - allows us to dispatch async actions easily. For more info
         // @see https://github.com/gaearon/redux-thunk.
-        let middleware = MiddlewareRegistry.applyMiddleware(Thunk);
+        // DVision 미들웨어 추가
+        let middleware = MiddlewareRegistry.applyMiddleware(Thunk, ...middlewares);
 
         // Try to enable Redux DevTools Chrome extension in order to make it
         // available for the purposes of facilitating development.
         let devToolsExtension;
 
         if (typeof window === 'object'
-                && (devToolsExtension = window.devToolsExtension)) {
+            && (devToolsExtension = window.devToolsExtension)) {
             middleware = compose(middleware, devToolsExtension());
         }
 
         const store = createStore(
             reducer, PersistenceRegistry.getPersistedState(), middleware);
+
+        sagaMiddleware.run(rootSaga);
 
         // StateListenerRegistry
         StateListenerRegistry.subscribe(store);
@@ -250,7 +287,7 @@ export default class BaseApp extends Component<*, State> {
         // expected route. In order to mitigate the problem, _navigate was
         // changed to return a Promise.
         return new Promise(resolve => {
-            this.setState({ route }, resolve);
+            this.setState({route}, resolve);
         });
     }
 
@@ -259,5 +296,5 @@ export default class BaseApp extends Component<*, State> {
      *
      * @returns {React$Element}
      */
-    _renderDialogContainer: () => React$Element<*>;
+    _renderDialogContainer: () => React$Element<*>
 }

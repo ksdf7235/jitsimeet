@@ -1,4 +1,4 @@
-import CardRayout from '../../component/common/CardRayout';
+import CardRayout from '../component/common/CardRayout';
 import React from "react";
 import styled from 'styled-components';
 

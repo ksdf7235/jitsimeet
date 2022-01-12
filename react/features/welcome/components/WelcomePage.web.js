@@ -1,6 +1,8 @@
 /* global interfaceConfig */
 
 import React from 'react';
+import { withRouter } from 'react-router-dom';
+import styled from 'styled-components';
 
 import { isMobileBrowser } from '../../base/environment/utils';
 import { translate, translateToHTML } from '../../base/i18n';
@@ -8,11 +10,13 @@ import { Icon, IconWarning } from '../../base/icons';
 import { Watermarks } from '../../base/react';
 import { connect } from '../../base/redux';
 import { CalendarList } from '../../calendar-sync';
+import BtnImg from '../../dvision/component/meeting/EnterBtn';
 import { RecentList } from '../../recent-list';
 import { SettingsButton, SETTINGS_TABS } from '../../settings';
 
 import { AbstractWelcomePage, _mapStateToProps } from './AbstractWelcomePage';
 import Tabs from './Tabs';
+
 
 /**
  * The pattern used to validate room name.
@@ -129,7 +133,7 @@ class WelcomePage extends AbstractWelcomePage {
         super.componentDidMount();
 
         document.body.classList.add('welcome-page');
-        document.title = interfaceConfig.APP_NAME;
+        document.title = "NXDF-Meet";
 
         if (this.state.generateRoomnames) {
             this._updateRoomname();
@@ -180,80 +184,184 @@ class WelcomePage extends AbstractWelcomePage {
         const contentClassName = showAdditionalContent ? 'with-content' : 'without-content';
         const footerClassName = DISPLAY_WELCOME_FOOTER ? 'with-footer' : 'without-footer';
 
+
+        const MainRayout = styled.div`
+                align-items: center;
+                display: flex;
+                width :100%;
+                height: 100%;
+        `;
+
+
+        const MainLeft = styled.div`
+                background-color: #3F83FF;
+                height: 100%;
+                width: 40%;
+                display: flex;
+                flex-direction: column;
+                `;
+
+        const MainLeftHeader = styled.div`
+            width: 100%;
+            height: 10%;
+        `;
+
+        const MainLeftImg = styled.div`
+                display: flex;
+                width: 100%;
+                height: 100%;
+                margin-right: 0;
+        `;
+        const MainLeftilust = styled.div`
+            margin: auto 30px 30px auto;
+            width: 70%;
+            height: 80%;
+        `;
+        const LeftImg = styled.img`
+            width: 100%;
+            height: 100%;
+        `;
+
+        const MainRight = styled.div`
+                height: 100%;
+                width: 60%;
+        `;
+        const MainRightHeader = styled.div`
+            height: 10%;
+        `;
+
+        const EnterInput = styled.input`
+        width : 100% ;
+        height: 40px;
+        border: none;
+        `;
+
+        const EnterButton = styled.div`
+            display: flex;
+            width : 20%;
+            height : 100%;
+            align-items: center;
+            justify-content: center;
+        `;
+
+        const EnterForm = styled.form`
+            width : 80%;
+            height : 100%;
+        `;
+
+        const EnterContainer = styled.div`
+            margin-top: 30px;
+            display: flex;
+            justify-content: center;
+            width : 100%;
+            height: 10%;
+        `
+
+        const MainContent = styled.div`
+            margin: 30px auto 0 auto;
+            width : 60%;
+            height : 60%;
+        `
+        const CardContainer = styled.div`
+            margin-top: 40px;
+        `
+        const RoomH3 = styled.h3`
+            font-size: 1.4rem;
+            font-weight: 600;
+        `
+        const MeetingLogo = styled.div`
+        margin-top: 10px;
+        width: 100%;
+        height: 100px;
+        `;
+
+        const MeetingLogoimg = styled.img`
+        padding-left: 20px;
+        width: 170px;
+        height: 35px;
+    `;
+
+        const BtnP = styled.p`
+            font-size: 1rem;
+            color: black;
+        `
+
         return (
-            <div
-                className = { `welcome ${contentClassName} ${footerClassName}` }
-                id = 'welcome_page'>
-                <div className = 'welcome-watermark'>
-                    <Watermarks defaultJitsiLogoURL = { DEFAULT_WELCOME_PAGE_LOGO_URL } />
-                </div>
+            <MainRayout>
+                <MainLeft>
+                    <MainLeftHeader>
+                        <MeetingLogo>
+                            < MeetingLogoimg src="../images/watermark.png" />
+                        </MeetingLogo>
 
-                <div className = 'header'>
-                    <div className = 'welcome-page-settings'>
-                        <SettingsButton
-                            defaultTab = { SETTINGS_TABS.CALENDAR } />
-                        { showAdditionalToolbarContent
-                            ? <div
-                                className = 'settings-toolbar-content'
-                                ref = { this._setAdditionalToolbarContentRef } />
-                            : null
-                        }
-                    </div>
-                    <div className = 'header-image' />
-                    <div className = 'header-container'>
-                        <h1 className = 'header-text-title'>
-                            { t('welcomepage.headerTitle') }
-                        </h1>
-                        <span className = 'header-text-subtitle'>
-                            { t('welcomepage.headerSubtitle')}
-                        </span>
-                        <div id = 'enter_room'>
-                            <div className = 'enter-room-input-container'>
-                                <form onSubmit = { this._onFormSubmit }>
-                                    <input
-                                        aria-disabled = 'false'
-                                        aria-label = 'Meeting name input'
-                                        autoFocus = { true }
-                                        className = 'enter-room-input'
-                                        id = 'enter_room_field'
-                                        onChange = { this._onRoomChange }
-                                        pattern = { ROOM_NAME_VALIDATE_PATTERN_STR }
-                                        placeholder = { this.state.roomPlaceholder }
-                                        ref = { this._setRoomInputRef }
-                                        title = { t('welcomepage.roomNameAllowedChars') }
-                                        type = 'text'
-                                        value = { this.state.room } />
-                                    <div
-                                        className = { _moderatedRoomServiceUrl
-                                            ? 'warning-with-link'
-                                            : 'warning-without-link' }>
-                                        { this._renderInsecureRoomNameWarning() }
-                                    </div>
-                                </form>
-                            </div>
-                            <button
-                                aria-disabled = 'false'
-                                aria-label = 'Start meeting'
-                                className = 'welcome-page-button'
-                                id = 'enter_room_button'
-                                onClick = { this._onFormSubmit }
-                                tabIndex = '0'
-                                type = 'button'>
-                                { t('welcomepage.startMeeting') }
-                            </button>
-                        </div>
+                    </MainLeftHeader>
+                    <MainLeftImg >
+                        <MainLeftilust >
+                            <LeftImg src="../images/dvision-main-illust.png" />
+                        </MainLeftilust>
+                    </MainLeftImg>
+                </MainLeft>
+                <MainRight>
+                    <MainRightHeader>
+                        {/* 12/29 세팅 막아둠 */}
+                        {/* <div className = 'welcome-page-settings'>
+                            <SettingsButton
+                                defaultTab = { SETTINGS_TABS.CALENDAR } />
+                            { showAdditionalToolbarContent
+                                ? <div
+                                    className = 'settings-toolbar-content'
+                                    ref = { this._setAdditionalToolbarContentRef } />
+                                : null
+                            }
+                        </div> */}
+                    </MainRightHeader>
+                    <MainContent>
+                                <RoomH3>새로운 회의 방 만들기</RoomH3>
+                                <EnterContainer>
+                                    <EnterForm onSubmit = { this._onFormSubmit }>
+                                        <EnterInput
+                                            aria-disabled = 'false'
+                                            aria-label = 'Meeting name input'
+                                            autoFocus = { true }
+                                            className = 'enter-room-input'
+                                            id = 'enter_room_field'
+                                            onChange = { this._onRoomChange }
+                                            pattern = { ROOM_NAME_VALIDATE_PATTERN_STR }
+                                            placeholder = { "방 제목을 입력해주세요" }
+                                            ref = { this._setRoomInputRef }
+                                            title = { t('welcomepage.roomNameAllowedChars') }
+                                            type = 'text'
+                                            value = { this.state.room } />
+                                        <div
+                                            className = { _moderatedRoomServiceUrl
+                                                ? 'warning-with-link'
+                                                : 'warning-without-link' }>
+                                            { this._renderInsecureRoomNameWarning() }
+                                        </div>
+                                    </EnterForm>
+                                    <EnterButton
+                                    className = 'welcome-page-button'
+                                    id = 'enter_room_button'
+                                    onClick = { this._onFormSubmit }
+                                    >
+                                        <BtnP>
+                                            방 만들기
+                                        </BtnP>
+                                        <BtnImg value={"방만들기"} />
+                                    </EnterButton>
 
-                        { _moderatedRoomServiceUrl && (
-                            <div id = 'moderated-meetings'>
-                                <p>
-                                    {
-                                        translateToHTML(
-                                        t, 'welcomepage.moderatedMessage', { url: _moderatedRoomServiceUrl })
-                                    }
-                                </p>
-                            </div>)}
-                        </div>
-                        <div className = 'welcome-cards-container'>
+
+                                    { _moderatedRoomServiceUrl && (
+                                <div id = 'moderated-meetings'>
+                                    <p>
+                                        {
+                                            translateToHTML(
+                                            t, 'welcomepage.moderatedMessage', { url: _moderatedRoomServiceUrl })
+                                        }
+                                    </p>
+                                </div>)}
+                            </EnterContainer>
+                        <CardContainer>
                             <div className = 'welcome-card-row'>
                                 <div className = 'welcome-tabs welcome-card welcome-card--blue'>
                                     { this._renderTabs() }
@@ -270,10 +378,10 @@ class WelcomePage extends AbstractWelcomePage {
                                     className = 'welcome-page-content'
                                     ref = { this._setAdditionalContentRef } />
                                 : null }
-                        </div>
-                </div>
-
-            </div>
+                            </CardContainer>
+                    </MainContent>
+                </MainRight>
+            </MainRayout>
 
         );
     }
@@ -513,4 +621,4 @@ class WelcomePage extends AbstractWelcomePage {
     }
 }
 
-export default translate(connect(_mapStateToProps)(WelcomePage));
+export default withRouter(translate(connect(_mapStateToProps)(WelcomePage)));

@@ -19,7 +19,7 @@ import { BlankPage, isWelcomePageUserEnabled, WelcomePage } from '../welcome';
  */
 export function _getRouteToRender(stateful) {
     const state = toState(stateful);
-
+    console.log("여기1")
     return _getWebConferenceRoute(state) || _getWebWelcomePageRoute(state);
 }
 
@@ -42,7 +42,8 @@ function _getWebConferenceRoute(state) {
     // the history API is that we want to load the config.js which takes the
     // room into account.
     const { locationURL } = state['features/base/connection'];
-
+    
+    
     if (window.location.href !== locationURL.href) {
         route.href = locationURL.href;
 
@@ -54,6 +55,7 @@ function _getWebConferenceRoute(state) {
             if (deepLinkComponent) {
                 route.component = deepLinkComponent;
             } else if (isSupportedBrowser()) {
+                console.log(`여기3 ${locationURL.href}`);
                 route.component = Conference;
             } else {
                 route.component = UnsupportedDesktopBrowser;
@@ -71,23 +73,22 @@ function _getWebConferenceRoute(state) {
  */
 function _getWebWelcomePageRoute(state) {
     const route = _getEmptyRoute();
-    const {pathname} = window.location;
+    const {hash} = location;
 
     if (isWelcomePageUserEnabled(state)) {
         if (isSupportedBrowser()) {
-            if(pathname === "/"){
-                console.log(`here`)
+            console.log(`여기4 ${locationURL.href}`);
                 route.component = WelcomePage;
-            }
         } else {
             route.component = UnsupportedDesktopBrowser;
         }
     } else {
         // Web: if the welcome page is disabled, go directly to a random room.
 
+        
         let href = window.location.href;
 
-        href.endsWith('/') || (href += '/');
+        href.endsWith('#/') || (href += '/');
         route.href = href + generateRoomWithoutSeparator();
     }
 
